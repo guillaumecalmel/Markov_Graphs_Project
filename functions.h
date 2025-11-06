@@ -12,5 +12,8 @@ void display_list(t_list list);
 t_adj_list create_adj_list(int size);
 void display_adj_list(t_adj_list adj);
 t_adj_list readGraph(const char *filename);
+void check_markov_graph(t_adj_list graph);
+char* getId(int num);
+void writeMermaidGraph(t_adj_list* graph, const char* filename);
 
 #endif //FUNCTIONS_H

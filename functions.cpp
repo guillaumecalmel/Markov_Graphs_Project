@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "functions.h"
+#include <math.h>
 
 
 t_cell*create_Cell(int arr_vert, float proba){
@@ -71,4 +72,69 @@ t_adj_list readGraph(const char *filename) {
     }
     fclose(file);
     return adj;
+}
+
+void check_markov_graph(t_adj_list graph) {
+    int is_markov = 1;
+
+    for (int i = 0; i < graph.size; i++) {
+        float sum = 0.0f;
+        t_cell *curr = graph.array[i].head;
+
+        while (curr != NULL) {
+            sum += curr->proba;
+            curr = curr->next;
+        }
+
+        if (sum < 0.99f || sum > 1.01f) {
+            printf("Vertex %d: sum of probabilities = %.2f \n", i, sum);
+            is_markov = 0;
+        }
+    }
+
+    if (is_markov)
+        printf("The graph is a Markov graph.\n");
+    else
+        printf("The graph is not a Markov graph.\n");
+}
+
+char* getId(int num);
+
+void writeMermaidGraph(t_adj_list* graph, const char* filename) {
+    FILE* fp = fopen(filename, "w");
+    if (!fp) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    // Write configuration
+    fprintf(fp, "---\n");
+    fprintf(fp, "config:\n");
+    fprintf(fp, "  layout: elk\n");
+    fprintf(fp, "  theme: neo\n");
+    fprintf(fp, "  look: neo\n");
+    fprintf(fp, "---\n\n");
+    fprintf(fp, "flowchart LR\n\n");
+
+    // Write vertices
+    for (int i = 0; i < graph->size; i++) {
+        char* id = getId(i + 1); // assuming vertices numbered 1..size
+        fprintf(fp, "  %s((%d))\n", id, i + 1);
+    }
+
+    fprintf(fp, "\n");
+
+    // Write edges
+    for (int i = 0; i < graph->size; i++) {
+        t_cell* current = graph->array[i].head;
+        char* fromId = getId(i + 1);
+
+        while (current != NULL) {
+            char* toId = getId(current->arrival_vertex);
+            fprintf(fp, "  %s -->|%.2f|%s\n", fromId, current->proba, toId);
+            current = current->next;
+        }
+    }
+
+    fclose(fp);
 }

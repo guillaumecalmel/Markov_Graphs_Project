@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include "functions.h"
 
 int main() {
     t_adj_list graph = readGraph("data_file.txt");
